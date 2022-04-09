@@ -1,14 +1,18 @@
 package com.example.tmp_finedust;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+
+import androidx.core.content.ContextCompat;
 
 public class MyLocationFinder extends Service implements LocationListener {
 
@@ -41,6 +45,15 @@ public class MyLocationFinder extends Service implements LocationListener {
             }
             else {
                 // 사용 가능
+
+                int hasFineLocationPermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION);
+                int hasCoarseLocationPermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION);
+
+                if(hasFineLocationPermission != PackageManager.PERMISSION_GRANTED &&
+                    hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) {
+                    throw new Exception();
+                }
+
                 if (isGPSEnabled) {
                     // GPS 사용 가능
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
