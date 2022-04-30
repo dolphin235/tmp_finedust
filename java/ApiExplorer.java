@@ -1,4 +1,5 @@
-package parsing;
+package fine_dust2;
+
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,6 +20,11 @@ import java.io.InputStream;
 
 
 public class ApiExplorer {
+	static enum dust_type {
+		FINE_DUST,
+		VFINE_DUST
+	}
+	
     public static void main(String[] args) throws IOException {
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty"); /*URL*/
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=kj9rVtwid%2FEpOFekRhn%2Bzyu2KBcIReuxj%2BpLdZ1NuMyi1Im5XORdmUe9lkxXAAHBNqEhOg18ATJOj4Lqs5MM%2FA%3D%3D"); /*Service Key*/
@@ -46,7 +52,7 @@ public class ApiExplorer {
         rd.close();
         conn.disconnect();
         //System.out.println(sb.toString());
-        xml_parsing(sb.toString(), "종로구");
+        xml_parsing(sb.toString(), "중구");
     }
     
     public static void xml_parsing(String data, String target_location) {
@@ -86,8 +92,8 @@ public class ApiExplorer {
         			System.out.println("미세  : "+tmp_finedust);
         			System.out.println("초미세 : "+tmp_vfinedust);
         			
-        			System.out.println("미세 등급: "+finedust_level(tmp_finedust));
-        			System.out.println("초미세 등급: "+vfinedust_level(tmp_vfinedust));
+        			System.out.println("미세 등급: "+dust_level(tmp_finedust, dust_type.FINE_DUST));
+        			System.out.println("초미세 등급: "+dust_level(tmp_vfinedust, dust_type.VFINE_DUST));
         			
     				break;
     			}
@@ -100,39 +106,31 @@ public class ApiExplorer {
 	    	
     }
     
-    public static String finedust_level(String input) {
-    	if (input.equals('-')) {
-    		return input;
+    public static String dust_level(String input, dust_type dust_type) {
+    	int[] section_array;
+    	if (dust_type == dust_type.FINE_DUST) {
+    		section_array = new int[] {30,80,15};
     	}
-    	int value = Integer.parseInt(input);
-    	
-    	if (value <= 30) {
-    		return "좋음";
-    	}
-    	else if (value <= 80) {
-    		return "보통";
-    	}
-    	else if (value <= 150) {
-    		return "나쁨";
+    	else if(dust_type == dust_type.VFINE_DUST){
+    		section_array = new int[] {15,35,75};
     	}
     	else {
-    		return "매우나쁨";
+    		System.out.println("ERROR");
+    		return "error";
     	}
-    }
-    
-    public static String vfinedust_level(String input) {
+    	
     	if (input.equals('-')) {
     		return input;
     	}
     	int value = Integer.parseInt(input);
     	
-    	if (value <= 15) {
+    	if (value <= section_array[0]) {
     		return "좋음";
     	}
-    	else if (value <= 35) {
+    	else if (value <= section_array[1]) {
     		return "보통";
     	}
-    	else if (value <= 75) {
+    	else if (value <= section_array[2]) {
     		return "나쁨";
     	}
     	else {
